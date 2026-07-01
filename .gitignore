@@ -23,6 +23,8 @@ firestore-debug.log
 # Service-account keys — NEVER commit these
 serviceAccount*.json
 *service-account*.json
+*adminsdk*.json
+*-firebase-adminsdk-*.json
 
 # Internal source documents (donor details, photos, working notes) — kept local, not published
 Homepage.pdf
