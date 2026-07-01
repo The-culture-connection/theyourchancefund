@@ -1,9 +1,9 @@
 // The Your Chance Fund — public website service.
-// Serves the landing page, application form, and donor form, and accepts
-// submissions into the shared PostgreSQL database.
+// Serves the landing page, application form, and donor form, and writes
+// submissions to Cloud Firestore.
 const path = require('path');
 const express = require('express');
-const { pool, initSchema } = require('./db');
+const store = require('./store');
 
 const app = express();
 app.use(express.json({ limit: '256kb' }));
@@ -31,23 +31,16 @@ app.post('/api/apply', async (req, res) => {
       return res.status(400).json({ error: 'Please enter a valid email address.' });
     }
 
-    await pool.query(
-      `INSERT INTO applications
-        (applicant_name, email, phone, business_name, business_type,
-         q1_subscribers, q2_data_source, q3_costs, q4_growth_strategy,
-         q5_pricing_impact, q6_differentiation, pitch_deck_url, demo_url,
-         social_media, references_text)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
-      [
-        applicant_name, email, str(b.phone, 60), business_name, business_type,
-        str(b.q1_subscribers), str(b.q2_data_source), str(b.q3_costs),
-        str(b.q4_growth_strategy), str(b.q5_pricing_impact), str(b.q6_differentiation),
-        str(b.pitch_deck_url, 1000), str(b.demo_url, 1000),
-        str(b.social_media, 2000), str(b.references_text),
-      ]
-    );
+    const id = await store.addApplication({
+      applicant_name, email, phone: str(b.phone, 60), business_name, business_type,
+      q1_subscribers: str(b.q1_subscribers), q2_data_source: str(b.q2_data_source),
+      q3_costs: str(b.q3_costs), q4_growth_strategy: str(b.q4_growth_strategy),
+      q5_pricing_impact: str(b.q5_pricing_impact), q6_differentiation: str(b.q6_differentiation),
+      pitch_deck_url: str(b.pitch_deck_url, 1000), demo_url: str(b.demo_url, 1000),
+      social_media: str(b.social_media, 2000), references_text: str(b.references_text),
+    });
 
-    res.status(201).json({ ok: true });
+    res.status(201).json({ ok: true, id });
   } catch (err) {
     console.error('POST /api/apply failed:', err);
     res.status(500).json({ error: 'Could not save your application. Please try again.' });
@@ -69,12 +62,8 @@ app.post('/api/donate', async (req, res) => {
       return res.status(400).json({ error: 'Please enter a valid email address.' });
     }
 
-    await pool.query(
-      'INSERT INTO donors (name, email, phone) VALUES ($1,$2,$3)',
-      [name, email, phone]
-    );
-
-    res.status(201).json({ ok: true });
+    const id = await store.addDonor({ name, email, phone });
+    res.status(201).json({ ok: true, id });
   } catch (err) {
     console.error('POST /api/donate failed:', err);
     res.status(500).json({ error: 'Could not save your inquiry. Please try again.' });
@@ -88,9 +77,4 @@ app.get('/healthz', (_req, res) => res.json({ ok: true }));
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
 const PORT = process.env.PORT || 3000;
-initSchema()
-  .then(() => app.listen(PORT, () => console.log(`[website] listening on ${PORT}`)))
-  .catch((err) => {
-    console.error('Startup failed:', err);
-    process.exit(1);
-  });
+app.listen(PORT, () => console.log(`[website] listening on ${PORT}`));

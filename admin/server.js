@@ -1,11 +1,21 @@
 // The Your Chance Fund — admin portal.
 // Password-protected dashboard for reviewing applications (filterable by
 // submission date and business type) and donor inquiries. Includes CSV export.
+// Data is read from Cloud Firestore via ./store.
 const path = require('path');
 const crypto = require('crypto');
 const express = require('express');
 const session = require('express-session');
-const { pool, initSchema } = require('./db');
+const store = require('./store');
+
+// Business-type options for the filter dropdown. Keep this in sync with the
+// <select id="business_type"> in website/public/apply.html.
+const BUSINESS_TYPES = [
+  'Food & Beverage', 'Retail & E-commerce', 'Technology / Software',
+  'Professional Services', 'Health & Wellness', 'Beauty & Personal Care',
+  'Construction & Trades', 'Arts, Media & Entertainment', 'Education & Training',
+  'Transportation & Logistics', 'Nonprofit / Community', 'Other',
+];
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -66,46 +76,16 @@ app.post('/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/login'));
 });
 
-// ---- Query helpers -------------------------------------------------------
-// Build a WHERE clause for the application filters. `from`/`to` are YYYY-MM-DD.
-function applicationFilters(q) {
-  const where = [];
-  const params = [];
-  if (q.type) {
-    params.push(q.type);
-    where.push(`business_type = $${params.length}`);
-  }
-  if (q.from) {
-    params.push(q.from);
-    where.push(`created_at >= $${params.length}::timestamptz`);
-  }
-  if (q.to) {
-    params.push(q.to);
-    // inclusive of the whole "to" day (next midnight, exclusive)
-    where.push(`created_at < ($${params.length}::timestamptz + INTERVAL '1 day')`);
-  }
-  const clause = where.length ? 'WHERE ' + where.join(' AND ') : '';
-  return { clause, params };
-}
-
 // ---- Dashboard: applications --------------------------------------------
 app.get('/', requireAuth, async (req, res) => {
   try {
-    const { clause, params } = applicationFilters(req.query);
-    const { rows } = await pool.query(
-      `SELECT id, created_at, applicant_name, business_name, business_type, email, phone
-         FROM applications ${clause}
-        ORDER BY created_at DESC`,
-      params
-    );
-    const types = await pool.query(
-      'SELECT DISTINCT business_type FROM applications ORDER BY business_type'
-    );
+    const filters = { type: req.query.type || '', from: req.query.from || '', to: req.query.to || '' };
+    const rows = await store.listApplications(filters);
     res.render('dashboard', {
       tab: 'applications',
       rows,
-      businessTypes: types.rows.map((r) => r.business_type),
-      filters: { type: req.query.type || '', from: req.query.from || '', to: req.query.to || '' },
+      businessTypes: BUSINESS_TYPES,
+      filters,
       count: rows.length,
     });
   } catch (err) {
@@ -117,9 +97,9 @@ app.get('/', requireAuth, async (req, res) => {
 // ---- Application detail ---------------------------------------------------
 app.get('/applications/:id', requireAuth, async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT * FROM applications WHERE id = $1', [req.params.id]);
-    if (!rows.length) return res.status(404).send('Application not found.');
-    res.render('detail', { a: rows[0] });
+    const a = await store.getApplication(req.params.id);
+    if (!a) return res.status(404).send('Application not found.');
+    res.render('detail', { a });
   } catch (err) {
     console.error('GET /applications/:id failed:', err);
     res.status(500).send('Database error.');
@@ -129,21 +109,9 @@ app.get('/applications/:id', requireAuth, async (req, res) => {
 // ---- Donor inquiries ------------------------------------------------------
 app.get('/donors', requireAuth, async (req, res) => {
   try {
-    const where = [];
-    const params = [];
-    if (req.query.from) { params.push(req.query.from); where.push(`created_at >= $${params.length}::timestamptz`); }
-    if (req.query.to)   { params.push(req.query.to);   where.push(`created_at < ($${params.length}::timestamptz + INTERVAL '1 day')`); }
-    const clause = where.length ? 'WHERE ' + where.join(' AND ') : '';
-    const { rows } = await pool.query(
-      `SELECT id, created_at, name, email, phone FROM donors ${clause} ORDER BY created_at DESC`,
-      params
-    );
-    res.render('donors', {
-      tab: 'donors',
-      rows,
-      filters: { from: req.query.from || '', to: req.query.to || '' },
-      count: rows.length,
-    });
+    const filters = { from: req.query.from || '', to: req.query.to || '' };
+    const rows = await store.listDonors(filters);
+    res.render('donors', { tab: 'donors', rows, filters, count: rows.length });
   } catch (err) {
     console.error('GET /donors failed:', err);
     res.status(500).send('Database error.');
@@ -161,18 +129,17 @@ function toCsv(headers, records) {
   return '﻿' + lines.join('\r\n'); // BOM so Excel reads UTF-8
 }
 
+const iso = (d) => (d ? new Date(d).toISOString() : '');
+
 app.get('/export/applications.csv', requireAuth, async (req, res) => {
-  const { clause, params } = applicationFilters(req.query);
-  const { rows } = await pool.query(
-    `SELECT * FROM applications ${clause} ORDER BY created_at DESC`, params
-  );
+  const rows = await store.listApplications({ type: req.query.type, from: req.query.from, to: req.query.to });
   const headers = [
     'ID', 'Submitted', 'Applicant', 'Email', 'Phone', 'Business', 'Business Type',
     'Q1 Subscribers', 'Q2 Data Source', 'Q3 Costs', 'Q4 Growth Strategy',
     'Q5 Pricing Impact', 'Q6 Differentiation', 'Pitch Deck', 'Demo', 'Social Media', 'References',
   ];
   const records = rows.map((r) => [
-    r.id, new Date(r.created_at).toISOString(), r.applicant_name, r.email, r.phone,
+    r.id, iso(r.created_at), r.applicant_name, r.email, r.phone,
     r.business_name, r.business_type, r.q1_subscribers, r.q2_data_source, r.q3_costs,
     r.q4_growth_strategy, r.q5_pricing_impact, r.q6_differentiation,
     r.pitch_deck_url, r.demo_url, r.social_media, r.references_text,
@@ -183,9 +150,9 @@ app.get('/export/applications.csv', requireAuth, async (req, res) => {
 });
 
 app.get('/export/donors.csv', requireAuth, async (req, res) => {
-  const { rows } = await pool.query('SELECT * FROM donors ORDER BY created_at DESC');
+  const rows = await store.listDonors({ from: req.query.from, to: req.query.to });
   const headers = ['ID', 'Submitted', 'Name', 'Email', 'Phone'];
-  const records = rows.map((r) => [r.id, new Date(r.created_at).toISOString(), r.name, r.email, r.phone]);
+  const records = rows.map((r) => [r.id, iso(r.created_at), r.name, r.email, r.phone]);
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
   res.setHeader('Content-Disposition', 'attachment; filename="tycf-donors.csv"');
   res.send(toCsv(headers, records));
@@ -194,9 +161,4 @@ app.get('/export/donors.csv', requireAuth, async (req, res) => {
 app.get('/healthz', (_req, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 3001;
-initSchema()
-  .then(() => app.listen(PORT, () => console.log(`[admin] listening on ${PORT}`)))
-  .catch((err) => {
-    console.error('Startup failed:', err);
-    process.exit(1);
-  });
+app.listen(PORT, () => console.log(`[admin] listening on ${PORT}`));

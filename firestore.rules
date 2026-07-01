@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // All reads and writes go through the Firebase Admin SDK on the Railway
+    // services, which runs with full privileges and bypasses these rules.
+    // No browser talks to Firestore directly, so deny all client access.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -14,6 +14,16 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
+# Firebase emulator logs / local data
+*-debug.log
+firebase-debug.log
+firestore-debug.log
+.firebase/
+
+# Service-account keys — NEVER commit these
+serviceAccount*.json
+*service-account*.json
+
 # Internal source documents (donor details, photos, working notes) — kept local, not published
 Homepage.pdf
 Testimonials.pdf
