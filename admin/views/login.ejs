@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign in — TYCF Admin</title>
+  <link rel="icon" href="/static/logo.svg" />
+  <link rel="stylesheet" href="/static/admin.css" />
+</head>
+<body>
+  <div class="login-page">
+    <form class="login-card" method="POST" action="/login">
+      <img src="/static/logo.svg" alt="The Your Chance Fund" />
+      <h1>Admin Portal</h1>
+      <p>Enter the committee password to continue.</p>
+      <% if (error) { %><div class="login-err"><%= error %></div><% } %>
+      <input type="password" name="password" placeholder="Password" autofocus required />
+      <button class="btn btn--navy" type="submit">Sign in</button>
+    </form>
+  </div>
+</body>
+</html>

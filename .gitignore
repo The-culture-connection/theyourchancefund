@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Env & secrets
+.env
+**/.env
+
+# Logs
+npm-debug.log*
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Internal source documents (donor details, photos, working notes) — kept local, not published
+Homepage.pdf
+Testimonials.pdf
+Mission Statement.docx
+Questions.txt

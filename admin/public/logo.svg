@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 150" role="img" aria-label="The Your Chance Fund">
+  <defs>
+    <style>
+      .navy { fill: #14315B; } .green { fill: #4A9A3F; } .gold { fill: #D8A22E; }
+      .t-small { font: 700 20px 'Arial', sans-serif; letter-spacing: 6px; }
+      .t-main  { font: 800 44px 'Arial', sans-serif; letter-spacing: 1px; }
+      .t-fund  { font: 700 22px 'Arial', sans-serif; letter-spacing: 14px; }
+    </style>
+  </defs>
+  <path d="M40 44 Q180 4 300 40" fill="none" stroke="#14315B" stroke-width="9" stroke-linecap="round"/>
+  <path class="gold" d="M232 12 l6.5 13.2 14.6 2.1 -10.6 10.3 2.5 14.5 -13-6.8 -13 6.8 2.5-14.5 -10.6-10.3 14.6-2.1z"/>
+  <text class="navy t-small" x="34" y="78">THE</text>
+  <text class="t-main" x="30" y="112"><tspan class="navy">YOUR </tspan><tspan class="green">CHANCE</tspan></text>
+  <line x1="34" y1="134" x2="120" y2="134" stroke="#14315B" stroke-width="3"/>
+  <text class="navy t-fund" x="132" y="141">FUND</text>
+  <line x1="245" y1="134" x2="326" y2="134" stroke="#14315B" stroke-width="3"/>
+</svg>

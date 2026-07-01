@@ -1,0 +1,57 @@
+<%- include('partials/header', { tab: 'applications' }) %>
+
+  <a class="back" href="javascript:history.back()">&larr; Back to applications</a>
+
+  <div class="detail-card">
+    <h1><%= a.business_name %></h1>
+
+    <div class="meta-grid">
+      <div class="m"><div class="k">Applicant</div><div class="v"><%= a.applicant_name %></div></div>
+      <div class="m"><div class="k">Business type</div><div class="v"><%= a.business_type %></div></div>
+      <div class="m"><div class="k">Email</div><div class="v"><a href="mailto:<%= a.email %>"><%= a.email %></a></div></div>
+      <div class="m"><div class="k">Phone</div><div class="v"><%= a.phone || '—' %></div></div>
+      <div class="m"><div class="k">Submitted</div><div class="v"><%= new Date(a.created_at).toLocaleString('en-US') %></div></div>
+      <div class="m"><div class="k">Application ID</div><div class="v">#<%= a.id %></div></div>
+    </div>
+
+    <%
+      const qa = [
+        ['1. Paying subscribers / customers so far', a.q1_subscribers],
+        ['2. Data source (AI/Internet vs. interviews)', a.q2_data_source],
+        ['3. Ongoing costs & is it self-sustaining?', a.q3_costs],
+        ['4. Growth strategy & pricing structure', a.q4_growth_strategy],
+        ['5. Pricing tiers vs. sustainability', a.q5_pricing_impact],
+        ['6. Differentiation from competitors', a.q6_differentiation],
+        ['9. Social media', a.social_media],
+        ['10. References', a.references_text],
+      ];
+      const links = [
+        ['7. Pitch deck', a.pitch_deck_url],
+        ['8. Demo / product link', a.demo_url],
+      ];
+    %>
+
+    <% links.forEach(function (l) { %>
+      <div class="qa">
+        <div class="q"><%= l[0] %></div>
+        <% if (l[1]) { %>
+          <div class="a"><a href="<%= l[1] %>" target="_blank" rel="noopener"><%= l[1] %></a></div>
+        <% } else { %>
+          <div class="a none">Not provided</div>
+        <% } %>
+      </div>
+    <% }); %>
+
+    <% qa.forEach(function (item) { %>
+      <div class="qa">
+        <div class="q"><%= item[0] %></div>
+        <% if (item[1]) { %>
+          <div class="a"><%= item[1] %></div>
+        <% } else { %>
+          <div class="a none">Not provided</div>
+        <% } %>
+      </div>
+    <% }); %>
+  </div>
+
+<%- include('partials/footer') %>

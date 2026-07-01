@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Become a Donor — The Your Chance Fund</title>
+  <meta name="description" content="Support aspiring entrepreneurs by becoming a donor to The Your Chance Fund." />
+  <link rel="icon" href="logo.svg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <nav class="nav">
+      <a class="nav__logo" href="/"><img src="logo.svg" alt="The Your Chance Fund" /></a>
+      <button class="nav__toggle" aria-label="Menu" onclick="document.getElementById('navlinks').classList.toggle('open')">☰</button>
+      <div class="nav__links" id="navlinks">
+        <a class="plain" href="/#mission">Mission</a>
+        <a class="plain" href="/#process">Process</a>
+        <a class="btn btn--ghost" href="/donate.html">Become a Donor</a>
+        <a class="btn btn--gold" href="/apply.html">Apply Now</a>
+      </div>
+    </nav>
+  </header>
+
+  <section class="page-intro">
+    <div class="container">
+      <h1>Become a Donor</h1>
+      <p>Your generosity gives bright minds and great ideas a chance. Share your details and a member of our Advisory Committee will reach out about ways to give.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container form-wrap">
+      <div class="alert alert--err" id="errBox"></div>
+
+      <form class="form-card" id="donorForm" novalidate>
+        <div class="form-section-title">Your contact information</div>
+
+        <div class="field">
+          <label for="name">Full name <span class="req">*</span></label>
+          <input id="name" name="name" type="text" required autocomplete="name" />
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="email">Email <span class="req">*</span></label>
+            <input id="email" name="email" type="email" required autocomplete="email" />
+          </div>
+          <div class="field">
+            <label for="phone">Phone <span class="req">*</span></label>
+            <input id="phone" name="phone" type="tel" required autocomplete="tel" />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn--green" type="submit" id="submitBtn">Submit Inquiry</button>
+          <p class="form-note">We'll only use your information to contact you about giving to The Your Chance Fund.</p>
+        </div>
+      </form>
+
+      <div class="form-card success-panel" id="successPanel">
+        <div class="check">✓</div>
+        <h2>Thank you!</h2>
+        <p class="lead">We've received your donor inquiry. A member of the Advisory Committee will be in touch soon to discuss how you can help fund the next generation of entrepreneurs.</p>
+        <a class="btn btn--navy" href="/">Back to Home</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <p class="footer-tag">OPPORTUNITY · EMPOWERMENT · COMMUNITY</p>
+      <p class="footer-small">&copy; <span id="yr"></span> The Your Chance Fund.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    const form = document.getElementById('donorForm');
+    const errBox = document.getElementById('errBox');
+    const btn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errBox.style.display = 'none';
+      const data = Object.fromEntries(new FormData(form).entries());
+
+      if (!data.name || !data.email || !data.phone) {
+        return showError('Please provide your name, email, and phone number.');
+      }
+
+      btn.disabled = true; btn.textContent = 'Submitting…';
+      try {
+        const res = await fetch('/api/donate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(out.error || 'Something went wrong. Please try again.');
+        form.style.display = 'none';
+        document.getElementById('successPanel').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (err) {
+        showError(err.message);
+        btn.disabled = false; btn.textContent = 'Submit Inquiry';
+      }
+    });
+
+    function showError(msg) {
+      errBox.textContent = msg;
+      errBox.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>

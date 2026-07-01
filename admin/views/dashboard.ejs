@@ -1,0 +1,71 @@
+<%- include('partials/header', { tab }) %>
+
+  <div class="page-head">
+    <h1>Applications <span class="count-pill"><%= count %></span></h1>
+    <a class="btn btn--green"
+       href="/export/applications.csv?<%= new URLSearchParams(filters).toString() %>">
+       Export CSV
+    </a>
+  </div>
+
+  <div class="filters">
+    <form method="GET" action="/">
+      <div class="fg">
+        <label for="type">Business type</label>
+        <select id="type" name="type">
+          <option value="">All types</option>
+          <% businessTypes.forEach(function (t) { %>
+            <option value="<%= t %>" <%= filters.type === t ? 'selected' : '' %>><%= t %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="fg">
+        <label for="from">From date</label>
+        <input id="from" type="date" name="from" value="<%= filters.from %>" />
+      </div>
+      <div class="fg">
+        <label for="to">To date</label>
+        <input id="to" type="date" name="to" value="<%= filters.to %>" />
+      </div>
+      <button class="btn btn--navy" type="submit">Apply filters</button>
+      <a class="btn btn--ghost" href="/">Clear</a>
+    </form>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Submitted</th>
+          <th>Applicant</th>
+          <th>Business</th>
+          <th>Type</th>
+          <th>Contact</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (rows.length === 0) { %>
+          <tr><td colspan="6"><div class="empty">No applications match these filters yet.</div></td></tr>
+        <% } %>
+        <% rows.forEach(function (r) { %>
+          <tr>
+            <td>
+              <%= new Date(r.created_at).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }) %>
+              <div class="muted"><%= new Date(r.created_at).toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' }) %></div>
+            </td>
+            <td><strong><%= r.applicant_name %></strong></td>
+            <td><%= r.business_name %></td>
+            <td><span class="tag"><%= r.business_type %></span></td>
+            <td>
+              <a href="mailto:<%= r.email %>"><%= r.email %></a>
+              <% if (r.phone) { %><div class="muted"><%= r.phone %></div><% } %>
+            </td>
+            <td><a class="btn btn--ghost" href="/applications/<%= r.id %>">View</a></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+
+<%- include('partials/footer') %>

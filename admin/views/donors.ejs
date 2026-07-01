@@ -1,0 +1,47 @@
+<%- include('partials/header', { tab }) %>
+
+  <div class="page-head">
+    <h1>Donor Inquiries <span class="count-pill"><%= count %></span></h1>
+    <a class="btn btn--green" href="/export/donors.csv">Export CSV</a>
+  </div>
+
+  <div class="filters">
+    <form method="GET" action="/donors">
+      <div class="fg">
+        <label for="from">From date</label>
+        <input id="from" type="date" name="from" value="<%= filters.from %>" />
+      </div>
+      <div class="fg">
+        <label for="to">To date</label>
+        <input id="to" type="date" name="to" value="<%= filters.to %>" />
+      </div>
+      <button class="btn btn--navy" type="submit">Apply filters</button>
+      <a class="btn btn--ghost" href="/donors">Clear</a>
+    </form>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr><th>Submitted</th><th>Name</th><th>Email</th><th>Phone</th></tr>
+      </thead>
+      <tbody>
+        <% if (rows.length === 0) { %>
+          <tr><td colspan="4"><div class="empty">No donor inquiries match these filters yet.</div></td></tr>
+        <% } %>
+        <% rows.forEach(function (r) { %>
+          <tr>
+            <td>
+              <%= new Date(r.created_at).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }) %>
+              <div class="muted"><%= new Date(r.created_at).toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' }) %></div>
+            </td>
+            <td><strong><%= r.name %></strong></td>
+            <td><a href="mailto:<%= r.email %>"><%= r.email %></a></td>
+            <td><a href="tel:<%= r.phone %>"><%= r.phone %></a></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+
+<%- include('partials/footer') %>

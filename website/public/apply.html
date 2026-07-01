@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apply for Funding — The Your Chance Fund</title>
+  <meta name="description" content="Apply for funding and support from The Your Chance Fund." />
+  <link rel="icon" href="logo.svg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <nav class="nav">
+      <a class="nav__logo" href="/"><img src="logo.svg" alt="The Your Chance Fund" /></a>
+      <button class="nav__toggle" aria-label="Menu" onclick="document.getElementById('navlinks').classList.toggle('open')">☰</button>
+      <div class="nav__links" id="navlinks">
+        <a class="plain" href="/#mission">Mission</a>
+        <a class="plain" href="/#process">Process</a>
+        <a class="btn btn--ghost" href="/donate.html">Become a Donor</a>
+        <a class="btn btn--gold" href="/apply.html">Apply Now</a>
+      </div>
+    </nav>
+  </header>
+
+  <section class="page-intro">
+    <div class="container">
+      <h1>Apply for Funding</h1>
+      <p>Tell us about you and your business. Fields marked <span style="color:var(--gold)">*</span> are required. Take your time — thoughtful answers help the Committee understand your vision.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container form-wrap">
+      <div class="alert alert--err" id="errBox"></div>
+
+      <form class="form-card" id="applyForm" novalidate>
+        <!-- About you -->
+        <div class="form-section-title">About you &amp; your business</div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="applicant_name">Full name <span class="req">*</span></label>
+            <input id="applicant_name" name="applicant_name" type="text" required autocomplete="name" />
+          </div>
+          <div class="field">
+            <label for="business_name">Business name <span class="req">*</span></label>
+            <input id="business_name" name="business_name" type="text" required />
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="email">Email <span class="req">*</span></label>
+            <input id="email" name="email" type="email" required autocomplete="email" />
+          </div>
+          <div class="field">
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="business_type">Business type / industry <span class="req">*</span></label>
+          <select id="business_type" name="business_type" required>
+            <option value="" disabled selected>Select one…</option>
+            <option>Food &amp; Beverage</option>
+            <option>Retail &amp; E-commerce</option>
+            <option>Technology / Software</option>
+            <option>Professional Services</option>
+            <option>Health &amp; Wellness</option>
+            <option>Beauty &amp; Personal Care</option>
+            <option>Construction &amp; Trades</option>
+            <option>Arts, Media &amp; Entertainment</option>
+            <option>Education &amp; Training</option>
+            <option>Transportation &amp; Logistics</option>
+            <option>Nonprofit / Community</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <!-- Application questions -->
+        <div class="form-section-title">Your business in detail</div>
+
+        <div class="field">
+          <label for="q1_subscribers">1. How many monthly/annual paying subscribers/customers do you have so far?</label>
+          <textarea id="q1_subscribers" name="q1_subscribers"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="q2_data_source">2. Is most of your data generated from AI/the Internet, or from interview questions?</label>
+          <textarea id="q2_data_source" name="q2_data_source"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="q3_costs">3. What is the ongoing monthly/annual primary cost of running the business? Does current revenue cover those costs?</label>
+          <div class="hint">We're just trying to understand if it's currently self-sustaining — no income statement needed.</div>
+          <textarea id="q3_costs" name="q3_costs"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="q4_growth_strategy">4. Briefly share your growth strategy and pricing structure.</label>
+          <textarea id="q4_growth_strategy" name="q4_growth_strategy"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="q5_pricing_impact">5. How will the different pricing tiers impact business sustainability?</label>
+          <textarea id="q5_pricing_impact" name="q5_pricing_impact"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="q6_differentiation">6. How might your business differ from similar/competing businesses (for example, "Voice of Your Customer")?</label>
+          <textarea id="q6_differentiation" name="q6_differentiation"></textarea>
+        </div>
+
+        <!-- Materials -->
+        <div class="form-section-title">Supporting materials</div>
+
+        <div class="field">
+          <label for="pitch_deck_url">7. Pitch deck link</label>
+          <div class="hint">Paste a shareable link (Google Drive, Dropbox, OneDrive, etc.). Please make sure sharing is enabled.</div>
+          <input id="pitch_deck_url" name="pitch_deck_url" type="url" placeholder="https://" />
+        </div>
+
+        <div class="field">
+          <label for="demo_url">8. Demo or product link</label>
+          <input id="demo_url" name="demo_url" type="url" placeholder="https://" />
+        </div>
+
+        <div class="field">
+          <label for="social_media">9. Social media</label>
+          <div class="hint">List your handles or links (Instagram, LinkedIn, Facebook, TikTok, website…).</div>
+          <textarea id="social_media" name="social_media"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="references_text">10. References</label>
+          <div class="hint">Name, relationship, and contact info (email/phone) for each reference.</div>
+          <textarea id="references_text" name="references_text"></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn--gold" type="submit" id="submitBtn">Submit Application</button>
+          <p class="form-note">By submitting, you confirm the information provided is accurate to the best of your knowledge.</p>
+        </div>
+      </form>
+
+      <!-- Success -->
+      <div class="form-card success-panel" id="successPanel">
+        <div class="check">✓</div>
+        <h2>Application received!</h2>
+        <p class="lead">Thank you for applying to The Your Chance Fund. The Advisory Committee will review your submission and reach out about next steps.</p>
+        <a class="btn btn--navy" href="/">Back to Home</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <p class="footer-tag">OPPORTUNITY · EMPOWERMENT · COMMUNITY</p>
+      <p class="footer-small">&copy; <span id="yr"></span> The Your Chance Fund.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    const form = document.getElementById('applyForm');
+    const errBox = document.getElementById('errBox');
+    const btn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errBox.style.display = 'none';
+      const data = Object.fromEntries(new FormData(form).entries());
+
+      // Basic client validation
+      if (!data.applicant_name || !data.email || !data.business_name || !data.business_type) {
+        return showError('Please fill in your name, email, business name, and business type.');
+      }
+
+      btn.disabled = true; btn.textContent = 'Submitting…';
+      try {
+        const res = await fetch('/api/apply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(out.error || 'Something went wrong. Please try again.');
+        form.style.display = 'none';
+        document.getElementById('successPanel').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (err) {
+        showError(err.message);
+        btn.disabled = false; btn.textContent = 'Submit Application';
+      }
+    });
+
+    function showError(msg) {
+      errBox.textContent = msg;
+      errBox.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>

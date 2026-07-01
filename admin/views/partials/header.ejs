@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TYCF Admin</title>
+  <link rel="icon" href="/static/logo.svg" />
+  <link rel="stylesheet" href="/static/admin.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <div class="brand">
+        <img src="/static/logo.svg" alt="TYCF" />
+        <span>Admin Portal</span>
+      </div>
+      <form method="POST" action="/logout">
+        <button class="logout-btn" type="submit">Log out</button>
+      </form>
+    </div>
+  </header>
+  <nav class="tabs">
+    <a href="/" class="<%= tab === 'applications' ? 'active' : '' %>">Applications</a>
+    <a href="/donors" class="<%= tab === 'donors' ? 'active' : '' %>">Donor Inquiries</a>
+  </nav>
+  <main class="wrap">
