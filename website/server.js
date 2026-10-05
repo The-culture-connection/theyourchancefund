@@ -55,10 +55,10 @@ app.post('/api/donate', async (req, res) => {
     const email = str(b.email, 200);
     const phone = str(b.phone, 60);
 
-    if (!name || !email || !phone) {
-      return res.status(400).json({ error: 'Name, email, and phone number are required.' });
+    if (!name || (!email && !phone)) {
+      return res.status(400).json({ error: 'Please include your name and an email or phone number.' });
     }
-    if (!isEmail(email)) {
+    if (email && !isEmail(email)) {
       return res.status(400).json({ error: 'Please enter a valid email address.' });
     }
 

@@ -26,7 +26,8 @@
   <section class="page-intro">
     <div class="container">
       <h1>Become a Donor</h1>
-      <p>Your generosity gives bright minds and great ideas a chance. Share your details and a member of our Advisory Committee will reach out about ways to give.</p>
+      <p>Your generosity gives bright minds and great ideas a chance. Optionally share your details so a member of our Advisory Committee can thank you and keep in touch, then continue to our secure giving page.</p>
+      <p><a class="btn btn--gold" href="https://gcfdn.fcsuite.com/erp/donate/create/fund?funit_id=4380">Skip &amp; Donate Now</a></p>
     </div>
   </section>
 
@@ -35,36 +36,29 @@
       <div class="alert alert--err" id="errBox"></div>
 
       <form class="form-card" id="donorForm" novalidate>
-        <div class="form-section-title">Your contact information</div>
+        <div class="form-section-title">Your contact information (optional)</div>
 
         <div class="field">
-          <label for="name">Full name <span class="req">*</span></label>
-          <input id="name" name="name" type="text" required autocomplete="name" />
+          <label for="name">Full name</label>
+          <input id="name" name="name" type="text" autocomplete="name" />
         </div>
 
         <div class="field-row">
           <div class="field">
-            <label for="email">Email <span class="req">*</span></label>
-            <input id="email" name="email" type="email" required autocomplete="email" />
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" />
           </div>
           <div class="field">
-            <label for="phone">Phone <span class="req">*</span></label>
-            <input id="phone" name="phone" type="tel" required autocomplete="tel" />
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" />
           </div>
         </div>
 
         <div class="form-actions">
-          <button class="btn btn--green" type="submit" id="submitBtn">Submit Inquiry</button>
-          <p class="form-note">We'll only use your information to contact you about giving to The Your Chance Fund.</p>
+          <button class="btn btn--green" type="submit" id="submitBtn">Continue to Donate</button>
+          <p class="form-note">All fields are optional — leave them blank to go straight to the donation page. We'll only use your information to contact you about giving to The Your Chance Fund.</p>
         </div>
       </form>
-
-      <div class="form-card success-panel" id="successPanel">
-        <div class="check">✓</div>
-        <h2>Thank you!</h2>
-        <p class="lead">We've received your donor inquiry. A member of the Advisory Committee will be in touch soon to discuss how you can help fund the next generation of entrepreneurs.</p>
-        <a class="btn btn--navy" href="/">Back to Home</a>
-      </div>
     </div>
   </section>
 
@@ -80,17 +74,23 @@
     const form = document.getElementById('donorForm');
     const errBox = document.getElementById('errBox');
     const btn = document.getElementById('submitBtn');
+    const DONATE_URL = 'https://gcfdn.fcsuite.com/erp/donate/create/fund?funit_id=4380';
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       errBox.style.display = 'none';
-      const data = Object.fromEntries(new FormData(form).entries());
+      const data = Object.fromEntries([...new FormData(form).entries()].map(([k, v]) => [k, v.trim()]));
 
-      if (!data.name || !data.email || !data.phone) {
-        return showError('Please provide your name, email, and phone number.');
+      // Form is optional: nothing entered means go straight to the donation page.
+      if (!data.name && !data.email && !data.phone) {
+        window.location.href = DONATE_URL;
+        return;
+      }
+      if (!data.name || (!data.email && !data.phone)) {
+        return showError('Please include your name and an email or phone number — or clear the form to skip it.');
       }
 
-      btn.disabled = true; btn.textContent = 'Submitting…';
+      btn.disabled = true; btn.textContent = 'Continuing…';
       try {
         const res = await fetch('/api/donate', {
           method: 'POST',
@@ -99,12 +99,10 @@
         });
         const out = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(out.error || 'Something went wrong. Please try again.');
-        form.style.display = 'none';
-        document.getElementById('successPanel').style.display = 'block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.location.href = DONATE_URL;
       } catch (err) {
         showError(err.message);
-        btn.disabled = false; btn.textContent = 'Submit Inquiry';
+        btn.disabled = false; btn.textContent = 'Continue to Donate';
       }
     });
 
